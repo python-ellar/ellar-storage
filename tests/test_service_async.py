@@ -1,5 +1,6 @@
 import os.path
 
+import pytest
 from ellar.common.datastructures import ContentFile
 from ellar.testing import Test
 
@@ -11,26 +12,28 @@ from ellar_storage import (
     get_driver,
 )
 
-from .utils import DUMB_DIRS, TEST_FIXTURES_DIRS, clean_directory
+from .utils import DUMB_DIRS, TEST_FIXTURES_DIRS
 
 module_config = {
-    "modules": [
-        StorageModule.setup(
-            files={
-                "driver": get_driver(Provider.LOCAL),
-                "options": {"key": os.path.join(DUMB_DIRS, "fixtures")},
-            },
-            images={
-                "driver": get_driver(Provider.LOCAL),
-                "options": {"key": os.path.join(DUMB_DIRS, "fixtures")},
-            },
-        )
-    ]
+    "modules": [StorageModule.register_setup()],
+    "config_module": {
+        "STORAGE_CONFIG": {
+            "storages": {
+                "files": {
+                    "driver": get_driver(Provider.LOCAL),
+                    "options": {"key": os.path.join(DUMB_DIRS, "fixtures")},
+                },
+                "images": {
+                    "driver": get_driver(Provider.LOCAL),
+                    "options": {"key": os.path.join(DUMB_DIRS, "fixtures")},
+                },
+            }
+        }
+    },
 }
 
-
-@clean_directory("fixtures")
-async def test_storage_get_operation_async(anyio_backend):
+@pytest.mark.asyncio
+async def test_storage_get_operation_async(clear_dir):
     tm = Test.create_test_module(**module_config)
     storage_service: StorageService = tm.get(StorageService)
 
@@ -52,8 +55,8 @@ async def test_storage_get_operation_async(anyio_backend):
     assert from_images.read() == b"File saving worked in images"
 
 
-@clean_directory("fixtures")
-async def test_storage_delete_operation_async(anyio_backend):
+@pytest.mark.asyncio
+async def test_storage_delete_operation_async(clear_dir):
     tm = Test.create_test_module(**module_config)
     storage_service: StorageService = tm.get(StorageService)
 
@@ -67,8 +70,8 @@ async def test_storage_delete_operation_async(anyio_backend):
     assert await storage_service.delete_async("images/get.txt")
 
 
-@clean_directory("fixtures")
-async def test_storage_save_content_operation_async(anyio_backend):
+@pytest.mark.asyncio
+async def test_storage_save_content_operation_async(clear_dir):
     tm = Test.create_test_module(**module_config)
 
     storage_service: StorageService = tm.get(StorageService)
