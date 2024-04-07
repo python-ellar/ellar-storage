@@ -15,26 +15,28 @@ from ellar_storage import (
     get_driver,
 )
 
-from .utils import DUMB_DIRS, TEST_FIXTURES_DIRS, clean_directory
+from .utils import DUMB_DIRS, TEST_FIXTURES_DIRS
 
 module_config = {
-    "modules": [
-        StorageModule.setup(
-            files={
-                "driver": get_driver(Provider.LOCAL),
-                "options": {"key": os.path.join(DUMB_DIRS, "fixtures")},
-            },
-            images={
-                "driver": get_driver(Provider.LOCAL),
-                "options": {"key": os.path.join(DUMB_DIRS, "fixtures")},
-            },
-        )
-    ]
+    "modules": [StorageModule.register_setup()],
+    "config_module": {
+        "STORAGE_CONFIG": {
+            "storages": {
+                "files": {
+                    "driver": get_driver(Provider.LOCAL),
+                    "options": {"key": os.path.join(DUMB_DIRS, "fixtures")},
+                },
+                "images": {
+                    "driver": get_driver(Provider.LOCAL),
+                    "options": {"key": os.path.join(DUMB_DIRS, "fixtures")},
+                },
+            }
+        }
+    },
 }
 
 
-@clean_directory("fixtures")
-def test_storage_get_operation():
+def test_storage_get_operation(clear_dir):
     tm = Test.create_test_module(**module_config)
     storage_service: StorageService = tm.get(StorageService)
 
@@ -56,8 +58,7 @@ def test_storage_get_operation():
     assert from_images.read() == b"File saving worked in images"
 
 
-@clean_directory("fixtures")
-def test_storage_delete_operation():
+def test_storage_delete_operation(clear_dir):
     tm = Test.create_test_module(**module_config)
     storage_service: StorageService = tm.get(StorageService)
 
@@ -71,8 +72,7 @@ def test_storage_delete_operation():
     assert storage_service.delete("images/get.txt")
 
 
-@clean_directory("fixtures")
-def test_storage_save_content_operation():
+def test_storage_save_content_operation(clear_dir):
     tm = Test.create_test_module(**module_config)
 
     storage_service: StorageService = tm.get(StorageService)
@@ -98,11 +98,10 @@ def test_storage_save_content_operation():
     )
 
     files = os.listdir(os.path.join(DUMB_DIRS, "fixtures", "files"))
-    assert files == ["copied-test.txt", "get.txt.metadata.json", "get.txt"]
+    assert set(files) == {"copied-test.txt", "get.txt.metadata.json", "get.txt"}
 
 
-@clean_directory("fixtures")
-def test_storage_get_container():
+def test_storage_get_container(clear_dir):
     tm = Test.create_test_module(**module_config)
 
     storage_service: StorageService = tm.get(StorageService)
@@ -123,8 +122,7 @@ def test_storage_get_container():
         storage_service.get_container("images-invalid")
 
 
-@clean_directory("fixtures")
-def test_storage_stored_file():
+def test_storage_stored_file(clear_dir):
     tm = Test.create_test_module(**module_config)
 
     storage_service: StorageService = tm.get(StorageService)
