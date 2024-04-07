@@ -9,30 +9,26 @@
 [![PyPI version](https://img.shields.io/pypi/pyversions/ellar-storage.svg)](https://pypi.python.org/pypi/ellar-storage)
 
 ## Introduction
-EllarStorage Module adds support for cloud and local file storage
-management using [apache `libcloud`](https://github.com/apache/libcloud) package to your Ellar application.
+The EllarStorage Module enriches your Ellar application with robust support for managing both cloud and 
+local file storage.
+Leveraging the capabilities of the [Apache `libcloud`](https://github.com/apache/libcloud) package
+to simplify file storage operations within your Ellar-powered projects.
 
 ## Installation
 ```shell
 $(venv) pip install ellar-storage
 ```
 
-This library was inspired by [sqlalchemy-file](https://github.com/jowilf/sqlalchemy-file)
+This library drew inspiration from [sqlalchemy-file](https://github.com/jowilf/sqlalchemy-file).
 
-
-## **Usage**
-Follow Ellar project scaffold here, then you configure your module.
+## Usage
+To integrate EllarStorage into your project, follow the standard Ellar project structure and then configure the module as follows:
 
 ### StorageModule
-Just like every other ellar `Module`s, `StorageModule`
-can be configured directly in where its used or through application config.
+Similar to other Ellar modules, the `StorageModule` can be configured directly where it's used or through the application configuration.
 
-### **StorageModule.setup**
-Quick example using `StorageModule.setup` method.
-
-Pattern of configuring Storages are in key-word patterns
-where the `key` is `Folder name/Container` and value is `StorageDriver` init properties.
-Example is shown below:
+### StorageModule.setup
+You can set up the `StorageModule` using the `setup` method. Here's a quick example:
 
 ```python
 import os
@@ -64,23 +60,11 @@ class ApplicationModule(ModuleBase):
     pass
 ```
 
-In the above illustration, When application initialization is complete,
-`files`, `images` and `documents` will be created in `os.path.join(BASE_DIRS, "media")`.
-Each is configured to be managed by Local Storage Driver.
-See other supported [storage drivers](https://libcloud.readthedocs.io/en/stable/storage/supported_providers.html#provider-matrix)
+In this example, after application initialization, folders for `files`, `images`, and `documents` will be created in the specified directory. Each folder is configured to be managed by a local storage driver. You can explore other supported [storage drivers](https://libcloud.readthedocs.io/en/stable/storage/supported_providers.html#provider-matrix).
 
-Each storage required `key` and some other parameters for object instantiation,
-so those should be provided in the `options` as a key-value pair.
+### StorageModule.register_setup
+Alternatively, you can move the storage configuration to the application config:
 
-Also, `default` parameter defines container/folder of choice when saving/retrieving 
-a file if storage container was specified. 
-It is important to note that if `default` is not set,
-it will default to the first storage container which in this can is `files`.
-
-
-### **StorageModule.register_setup**
-Alternatively, we can move the storage configuration to application Config and everything will still work fine.
-For example:
 ```python
 ## project_name/root_module.py
 
@@ -93,7 +77,7 @@ class ApplicationModule(ModuleBase):
     pass
 ```
 
-Then in `config.py` add the following code:
+Then, in `config.py`, you can define the storage configurations:
 
 ```python
 import os
@@ -102,7 +86,6 @@ from ellar.core.conf import ConfigDefaultTypesMixin
 from ellar_storage import get_driver, Provider
 
 BASE_DIRS = Path(__file__).parent
-
 
 class DevelopmentConfig(ConfigDefaultTypesMixin):
     DEBUG = True
@@ -127,10 +110,7 @@ class DevelopmentConfig(ConfigDefaultTypesMixin):
 ```
 
 ### StorageService
-
-At the end of `StorageModule` setup, `StorageService` is registered into an Ellar DI system.
-A quick way to test this would be through application instance.
-For example:
+At the end of the `StorageModule` setup, `StorageService` is registered into the Ellar DI system. Here's a quick example of how to use it:
 
 ```python
 ## project_name/server.py
@@ -141,7 +121,6 @@ from ellar.common import datastructures, constants
 from ellar.core import LazyModuleImport as lazyLoad
 from ellar_storage import StorageService
 
-
 application = AppFactory.create_from_app_module(
     lazyLoad("project_name.root_module:ApplicationModule"),
     config_module=os.environ.get(
@@ -150,20 +129,22 @@ application = AppFactory.create_from_app_module(
 )
 
 storage_service: StorageService = application.injector.get(StorageService)
-# save a file in files folder
+# Example: save a file in the 'files' folder
 storage_service.save(
-    file=datastructures.ContentFile(b"We can now save files in files folder", name="file.txt"), upload_storage='files')
-# save a file in images folder
+    file=datastructures.ContentFile(b"We can now save files in the 'files' folder", name="file.txt"), upload_storage='files')
+# Example: save a file in the 'images' folder
 storage_service.save(
-    file=datastructures.ContentFile(b"We can now save files in images folder", name="image.txt"), upload_storage='images')
-# save a file in document folder
+    file=datastructures.ContentFile(b"We can now save files in the 'images' folder", name="image.txt"), upload_storage='images')
+# Example: save a file in the 'documents' folder
 storage_service.save(
-    file=datastructures.ContentFile(b"We can now save files in documents folder", name="docs.txt"), upload_storage='documents')
+    file=datastructures.ContentFile(b"We can now save files in the 'documents' folder", name="docs.txt"), upload_storage='documents')
 ```
-### StorageService in Route functions
-You can inject `StorageService` into your controller or route functions. For example:
+
+### StorageService in Route Functions
+You can inject `StorageService` into your controllers or route functions. For instance:
 
 In Controller:
+
 ```python
 from ellar.common import ControllerBase, Controller
 from ellar_storage import StorageService
@@ -175,6 +156,7 @@ class FileManagerController(ControllerBase):
 ```
 
 In Route Function:
+
 ```python
 from ellar.common import UploadFile, Inject, post
 from ellar_storage import StorageService
@@ -184,83 +166,39 @@ def upload_file(self, file: UploadFile, storage_service: Inject[StorageService])
     pass
 ```
 
-Here is a quick example of a controller to manage files. This is just to illustrate how to use `StorageService`.
+See [Sample Project](https://github.com/python-ellar/ellar-storage/tree/master/samples)
 
-```python
-from ellar.common import (
-    Controller,
-    ControllerBase,
-    File,
-    Form,
-    Inject,
-    Query,
-    UploadFile,
-    delete,
-    file,
-    get,
-    post,
-)
+## API Reference
 
-from ellar_storage import StorageService
+### StorageService
 
-
-@Controller('/upload')
-class FileManagerController(ControllerBase):
-    def __init__(self, storage_service: StorageService):
-        self._storage_service = storage_service
-
-    @post("/", response=str)
-    def upload_file(
-            self,
-            upload: File[UploadFile],
-            storage_service: Inject[StorageService],
-            upload_storage: Form[str]
-    ):
-        assert self._storage_service == storage_service
-        res = storage_service.save(file=upload, upload_storage=upload_storage)
-        return res.filename
-
-    @get("/")
-    @file(media_type="application/octet-stream", streaming=True)
-    def download_file(self, path: Query[str]):
-        res = self._storage_service.get(path)
-        return {"media_type": res.content_type, "content": res.as_stream()}
-
-    @get("/download_as_attachment")
-    @file(media_type="application/octet-stream")
-    def download_as_attachment(self, path: Query[str]):
-        res = self._storage_service.get(path)
-        return {
-            "path": res.get_cdn_url(),  # since we are using a local storage, this will return a path to the file
-            "filename": res.filename,
-            'media_type': res.content_type
-        }
-
-    @delete("/", response=dict)
-    def delete_file(self, path: Query[str]):
-        self._storage_service.delete(path)
-        return ""
-```
-
-See [Sample Project]()
-
+- **_save(self, file: UploadFile, upload_storage: Optional[str] = None) -> StoredFile_**: Saves a file from an `UploadFile` object.
+- **_save_async(self, file: UploadFile, upload_storage: Optional[str] = None) -> StoredFile_**: Asynchronously saves a file from an `UploadFile` object.
+- **_save_content(self, **kwargs) -> StoredFile_**: Saves a file from content/bytes or through a file path.
+- **_save_content_async(self, **kwargs) -> StoredFile_**: Asynchronously saves a file from content/bytes or through a file path.
+- **_get(self, path: str) -> StoredFile_**: Retrieves a saved file if the specified `path` exists. The `path` can be in the format `container/filename.extension` or `filename.extension`.
+- **_get_async(self, path: str) -> StoredFile_**: Asynchronously retrieves a saved file if the specified `path` exists.
+- **_delete(self, path: str) -> bool_**: Deletes a saved file if the specified `path` exists.
+- **_delete_async(self, path: str) -> bool_**: Asynchronously deletes a saved file if the specified `path` exists.
+- **_get_container(self, name: Optional[str] = None) -> Container_**: Gets a `libcloud.storage.base.Container` instance for a configured storage setup.
 
 ### StoredFile
-`StoredFile` is file-like object returned from saving and retrieving saved files. 
-Its also extends some `libcloud` Object methods
-and has reference to the `libcloud` Object retrieved from the `libcloud` storage container.
 
-Some important attributes:
+`StoredFile` is a file-like object returned from saving and retrieving files. 
+It extends some `libcloud` Object methods and has a reference to the 
+`libcloud` Object retrieved from the storage container.
 
-- **name**: File name
-- **size**: File Size
-- **filename**: File name 
-- **content_type**: File Content Type
-- **object**: `libcloud` Object reference
-- **read(self, n: int = -1, chunk_size: t.Optional[int] = None) -> bytes**: Reads file content
-- **get_cdn_url(self) -> t.Optional[str]**: gets file cdn url
-- **as_stream(self, chunk_size: t.Optional[int] = None) -> t.Iterator[bytes]**: create a file stream
-- **delete(self) -> bool**: deletes file from container
+Key attributes include:
+
+- **_name_**: File name
+- **_size_**: File size
+- **_filename_**: File name 
+- **_content_type_**: File content type
+- **_object_**: `libcloud` Object reference
+- **_read(self, n: int = -1, chunk_size: Optional[int] = None) -> bytes_**: Reads file content
+- **_get_cdn_url(self) -> Optional[str]_**: Gets file CDN URL
+- **_as_stream(self, chunk_size: Optional[int] = None) -> Iterator[bytes]_**: Creates a file stream
+- **_delete(self) -> bool_**: Deletes the file from the container
 
 ## License
 Ellar is [MIT licensed](LICENSE).
