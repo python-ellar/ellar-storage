@@ -32,6 +32,7 @@ module_config = {
     },
 }
 
+
 @pytest.mark.asyncio
 async def test_storage_get_operation_async(clear_dir):
     tm = Test.create_test_module(**module_config)
