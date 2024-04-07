@@ -98,7 +98,7 @@ def test_storage_save_content_operation(clear_dir):
     )
 
     files = os.listdir(os.path.join(DUMB_DIRS, "fixtures", "files"))
-    assert files == ["copied-test.txt", "get.txt.metadata.json", "get.txt"]
+    assert set(files) == {"copied-test.txt", "get.txt.metadata.json", "get.txt"}
 
 
 def test_storage_get_container(clear_dir):
