@@ -7,3 +7,4 @@ types-python-dateutil
 types-pytz
 mypy == 1.9.0
 anyio[trio] >= 3.2.1
+httpx
