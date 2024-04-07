@@ -22,8 +22,8 @@ class _StorageSetupKey(t.TypedDict):
 @Module()
 class StorageModule(ModuleBase, IModuleSetup):
     @classmethod
-    def setup(cls, **kwargs: _StorageSetupKey) -> DynamicModule:
-        schema = StorageSetup(storages=kwargs)  # type:ignore[arg-type]
+    def setup(cls, default: t.Optional[str]=None, **kwargs: _StorageSetupKey) -> DynamicModule:
+        schema = StorageSetup(storages=kwargs, default=default)  # type:ignore[arg-type]
         return DynamicModule(
             cls,
             providers=[
