@@ -16,7 +16,7 @@ class _ContainerOptions(t.TypedDict):
 
 class _StorageSetupKey(t.TypedDict):
     driver: t.Type[StorageDriver]
-    options: _ContainerOptions
+    options: t.Union[_ContainerOptions, t.Dict[str, t.Any]]
 
 
 @Module()

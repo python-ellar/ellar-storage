@@ -168,6 +168,128 @@ def upload_file(self, file: UploadFile, storage_service: Inject[StorageService])
 
 See [Sample Project](https://github.com/python-ellar/ellar-storage/tree/master/samples)
 
+## Some Quick Cloud Setup
+
+### Google Cloud Storage
+
+- For a service Account
+
+    ```python
+    from ellar.common import Module
+    from ellar.core import ModuleBase
+    from ellar_storage import StorageModule, get_driver, Provider
+    
+    @Module(modules=[
+        StorageModule.setup(
+            files={
+                # For a service Account
+                "driver": get_driver(Provider.GOOGLE_STORAGE),
+                "options": {
+                    "key": "client_email",
+                    "secret": "private_key",
+                    "...": "..."
+                },
+            },
+        )
+    ])
+    class ApplicationModule(ModuleBase):
+        pass
+    ```
+- Installed Application
+    ```python
+    from ellar.common import Module
+    from ellar.core import ModuleBase
+    from ellar_storage import StorageModule, get_driver, Provider
+    
+    @Module(modules=[
+        StorageModule.setup(
+            files={
+                # For a service Account
+                "driver": get_driver(Provider.GOOGLE_STORAGE),
+                "options": {
+                    "key": "client_id",
+                    "secret": "client_secret",
+                    "...": "..."
+                },
+            },
+        )
+    ])
+    class ApplicationModule(ModuleBase):
+        pass
+    ```
+
+- GCE instance
+    ```python
+    from ellar.common import Module
+    from ellar.core import ModuleBase
+    from ellar_storage import StorageModule, get_driver, Provider
+    
+    @Module(modules=[
+        StorageModule.setup(
+            files={
+                # For a service Account
+                "driver": get_driver(Provider.GOOGLE_STORAGE),
+                "options": {
+                    "key": "GOOG0123456789ABCXYZ",
+                    "secret": "key_secret",
+                    "...": "..."
+                },
+            },
+        )
+    ])
+    class ApplicationModule(ModuleBase):
+        pass
+    ```
+See [GCS](https://libcloud.readthedocs.io/en/stable/storage/drivers/google_storage.html?highlight=Google%20Cloud%20Storage#api-docs)
+
+### AWS S3
+
+```python
+from ellar.common import Module
+from ellar.core import ModuleBase
+from ellar_storage import StorageModule, get_driver, Provider
+
+@Module(modules=[
+    StorageModule.setup(
+        files={
+            "driver": get_driver(Provider.S3),
+            "options": {
+                "key": "api key",
+                "secret": "api secret key"
+            },
+        },
+    )
+])
+class ApplicationModule(ModuleBase):
+    pass
+```
+
+#### Specifying canned ACL when uploading an object
+If you want to specify custom ACL when uploading an object, 
+you can do so by passing `extra` argument with the acl attribute to the `save` or `save_content` methods.
+
+Valid values for this attribute are:
+
+- private (default)
+- public-read 
+- public-read-write 
+- authenticated-read 
+- bucket-owner-read 
+- bucket-owner-full-control
+
+For example
+```python
+from ellar.common import UploadFile, Inject, post
+from ellar_storage import StorageService
+
+@post('/upload')
+def upload_file(self, file: UploadFile, storage_service: Inject[StorageService]):
+    extra = {"content_type": "application/octet-stream", "acl": "public-read"}
+    stored_file = storage_service.save(file=file, extra=extra)
+    
+    return {"message": f"{stored_file.filename} saved"}
+```
+
 ## API Reference
 
 ### StorageService
