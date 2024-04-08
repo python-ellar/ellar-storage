@@ -62,7 +62,15 @@ class StorageService:
         self,
         file: UploadFile,
         upload_storage: t.Optional[str] = None,
+        extra: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> StoredFile:
+        extra_ = extra or {}
+        extra_.setdefault(
+            "meta_data",
+            {"content_type": file.content_type, "filename": file.filename},
+        )
+        extra_.setdefault("content_type", file.content_type)
+
         return self.save_content(
             name=file.filename or str(uuid.uuid4())[10],
             content=file.file,

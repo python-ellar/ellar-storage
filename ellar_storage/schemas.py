@@ -1,6 +1,6 @@
 import typing as t
 
-from ellar.pydantic import model_validator
+from ellar.pydantic import field_validator, model_validator
 from pydantic import BaseModel
 
 from ellar_storage.storage import StorageDriver
@@ -9,6 +9,13 @@ from ellar_storage.storage import StorageDriver
 class _StorageSetupItem(BaseModel):
     driver: t.Type[StorageDriver]
     options: t.Dict[str, t.Any] = {}
+
+    @field_validator("options", mode="before")
+    def pre_options_validate(cls, value: t.Dict) -> t.Any:
+        if "key" not in value:
+            raise ValueError("Driver Options must have a `key` option ")
+
+        return value
 
 
 class StorageSetup(BaseModel):
