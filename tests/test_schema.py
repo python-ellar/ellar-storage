@@ -68,3 +68,15 @@ def test_storage_fails_for_invalid_default_storage():
             },
             default="files",
         )
+
+
+def test_storage_fails_for_invalid_driver_option():
+    with pytest.raises(ValueError, match="Driver Options must have a `key` option"):
+        StorageSetup(
+            storages={
+                "cloud": {
+                    "driver": get_driver(Provider.GOOGLE_STORAGE),
+                    "options": {"secret": "key_secret"},
+                }
+            },
+        )
