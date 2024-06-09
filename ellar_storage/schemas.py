@@ -24,6 +24,8 @@ class StorageSetup(BaseModel):
     default: t.Optional[str] = None
     # storage configurations
     storages: t.Dict[str, _StorageSetupItem]
+    # disable StorageController
+    disable_storage_controller: bool = False
 
     @model_validator(mode="before")
     def post_default_validate(cls, values: t.Dict) -> t.Any:
