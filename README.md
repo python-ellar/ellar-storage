@@ -109,6 +109,36 @@ class DevelopmentConfig(ConfigDefaultTypesMixin):
     )
 ```
 
+### StorageController
+`StorageModule` also registers `StorageController` which is useful when retrieving saved files.
+This can be disabled by setting `disable_storage_controller` to `True`.
+
+Also, `StorageController` is not protected and will be accessible to the public.
+However, it can be protected by simply applying `@Guard` or `@Authorize` decorator.
+
+#### Retrieving Saved Data
+By using `request.url_for`, we can generate a download link for the file we wish to retrieve
+For example:
+
+```python
+from ellar.common import Inject, post
+from ellar.core import Request
+
+@post('/get-books')
+def get_book_by_id(self, req: Request, book_id, session: Inject[Session]):
+    book = session.execute(
+        select(Book).where(Book.title == "Pointless Meetings")
+    ).scalar_one()
+    
+    return {
+      "title": book.title,
+      "cover": req.url_for("storage:download", path="{storage_name}/{file_name}"),
+      "thumbnail": req.url_for("storage:download", path=book.thumbnail.path)
+    }
+```
+With `req.url_for("storage:download", path="{storage_name}/{file_name}")`,
+we are able to create a download link to retrieve saved files.
+
 ### StorageService
 At the end of the `StorageModule` setup, `StorageService` is registered into the Ellar DI system. Here's a quick example of how to use it:
 

@@ -5,6 +5,7 @@ from ellar.core import Config, ModuleSetup
 from ellar.core.modules import DynamicModule, ModuleBase
 from ellar.di import ProviderConfig
 
+from ellar_storage.controller import StorageController
 from ellar_storage.schemas import StorageSetup
 from ellar_storage.services import StorageService
 from ellar_storage.storage import StorageDriver
@@ -23,14 +24,24 @@ class _StorageSetupKey(t.TypedDict):
 class StorageModule(ModuleBase, IModuleSetup):
     @classmethod
     def setup(
-        cls, default: t.Optional[str] = None, **kwargs: _StorageSetupKey
+        cls,
+        default: t.Optional[str] = None,
+        disable_storage_controller: bool = False,
+        **kwargs: _StorageSetupKey,
     ) -> DynamicModule:
-        schema = StorageSetup(storages=kwargs, default=default)  # type:ignore[arg-type]
+        schema = StorageSetup(
+            storages=kwargs,  # type:ignore[arg-type]
+            default=default,
+            disable_storage_controller=disable_storage_controller,
+        )
         return DynamicModule(
             cls,
             providers=[
                 ProviderConfig(StorageService, use_value=StorageService(schema)),
             ],
+            controllers=[]
+            if schema.disable_storage_controller
+            else [StorageController],
         )
 
     @classmethod
@@ -48,5 +59,8 @@ class StorageModule(ModuleBase, IModuleSetup):
                 providers=[
                     ProviderConfig(StorageService, use_value=StorageService(schema)),
                 ],
+                controllers=[]
+                if schema.disable_storage_controller
+                else [StorageController],
             )
         raise RuntimeError("Could not find `STORAGE_CONFIG` in application config.")
