@@ -9,7 +9,7 @@ from starlette.responses import RedirectResponse, StreamingResponse
 from ellar_storage.services import StorageService
 
 
-@ecm.Controller(name="storage")
+@ecm.Controller(name="storage", include_in_schema=False)
 class StorageController:
     def __init__(self, storage_service: StorageService):
         self._storage_service = storage_service
