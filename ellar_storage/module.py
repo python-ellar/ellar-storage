@@ -2,7 +2,7 @@ import typing as t
 
 from ellar.common import IModuleSetup, Module
 from ellar.core import Config, ModuleSetup
-from ellar.core.modules import DynamicModule, ModuleBase
+from ellar.core.modules import DynamicModule, ModuleBase, ModuleRefBase
 from ellar.di import ProviderConfig
 
 from ellar_storage.controller import StorageController
@@ -20,7 +20,7 @@ class _StorageSetupKey(t.TypedDict):
     options: t.Union[_ContainerOptions, t.Dict[str, t.Any]]
 
 
-@Module()
+@Module(exports=[StorageService], name="EllarStorageModule")
 class StorageModule(ModuleBase, IModuleSetup):
     @classmethod
     def setup(
@@ -50,12 +50,12 @@ class StorageModule(ModuleBase, IModuleSetup):
 
     @staticmethod
     def __register_setup_factory(
-        module: t.Type["StorageModule"], config: Config
+        module_ref: ModuleRefBase, config: Config
     ) -> DynamicModule:
         if config.get("STORAGE_CONFIG") and isinstance(config.STORAGE_CONFIG, dict):
             schema = StorageSetup(**dict(config.STORAGE_CONFIG))
             return DynamicModule(
-                module,
+                module_ref.module,
                 providers=[
                     ProviderConfig(StorageService, use_value=StorageService(schema)),
                 ],
