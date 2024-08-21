@@ -1,6 +1,7 @@
 import os.path
 
 import pytest
+from ellar.common import Module
 from ellar.testing import Test
 from starlette.routing import NoMatchFound
 
@@ -89,9 +90,13 @@ def test_module_register_fails_config_key_absents():
         tm.create_application()
 
 
-def test_disable_storage_controller():
+def test_disable_storage_controller(reflect_context):
+    @Module()
+    class StorageModuleModified(StorageModule):
+        pass
+
     tm = Test.create_test_module(
-        modules=[StorageModule.register_setup()],
+        modules=[StorageModuleModified.register_setup()],
         config_module={
             "STORAGE_CONFIG": {
                 "default": "files",

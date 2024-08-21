@@ -1,6 +1,6 @@
 """Storage Module for Ellar"""
 
-__version__ = "0.1.5"
+__version__ = "0.1.7"
 
 from .module import StorageModule
 from .providers import Provider, get_driver
