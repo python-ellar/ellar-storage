@@ -42,7 +42,7 @@ classifiers = [
 dependencies = [
     "ellar >= 0.8.2",
     "apache-libcloud >=3.6, <3.9",
-    "fasteners ==0.19"
+    "fasteners ==0.20"
 ]
 
 [project.urls]
